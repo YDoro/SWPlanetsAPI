@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node  dist/server.js",
+    "build": "tsc",
     "dev": "nodemon",
     "test": "jest --passWithNoTests --silent --noStackTrace --runInBand",
     "test:unit": "npm test --  --watch -c jest-unit-config.js",
