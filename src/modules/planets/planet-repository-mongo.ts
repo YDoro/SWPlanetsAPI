@@ -5,6 +5,7 @@ import { PlanetRepository } from "./planet-repository"
 
 export class PlanetMongoRepository implements PlanetRepository {
 
+
     private collection = 'planets'
 
     async create(planet: Planet): Promise<PlanetModel> {
@@ -30,6 +31,13 @@ export class PlanetMongoRepository implements PlanetRepository {
 
     async deletePlanetById(id: string): Promise<void> {
         await (await MongoHelper.getCollection(this.collection)).findOneAndDelete({ _id: ObjectId.createFromHexString(id) })
+    }
+
+    async getPlanetByName(name: string): Promise<PlanetModel> {
+        const collection = await MongoHelper.getCollection(this.collection)
+        const planet = await collection.findOne({ name })
+
+        return planet ? MongoHelper.map(planet) : null
     }
 
 
