@@ -1,4 +1,5 @@
 import { Request, Response, Router } from "express"
+import { MongoIdValidation } from "../../validators/mongo-id-validation"
 import { RequiredFieldValidation } from "../../validators/required-field-validation"
 import { SearchValidation } from "../../validators/search-validation"
 import planetControllerFactory from "./factories/planet-controller-factory"
@@ -62,8 +63,19 @@ export default (router: Router): void => {
 
     })
 
-    router.delete('/planet/:id', async (req: Request, res: Response) => {
-        res.json({ action: "delete" })
-
+    router.delete('/planets/:id', async (req: Request, res: Response) => {
+        try {
+            MongoIdValidation(req.params.id)
+            const response = await planetControllerFactory().delete(req.params.id)
+            res.status(response.status).json(response.body)
+        } catch (e) {
+            switch (e.name) {
+                case 'InvalidParamError':
+                    return res.status(400).json({ error: 'ValidationError', ...e })
+                default:
+                    console.error(e)
+                    return res.status(500).json({ error: 'InternalServerErrror' })
+            }
+        }
     })
 }
