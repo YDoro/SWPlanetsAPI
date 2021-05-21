@@ -1,7 +1,8 @@
 import { Request, Response, Router } from "express"
 import { RequiredFieldValidation } from "../../validators/required-field-validation"
+import { SearchValidation } from "../../validators/search-validation"
 import planetControllerFactory from "./factories/planet-controller-factory"
-
+import { PlanetModelSeachableParams } from "./planet-model"
 
 export default (router: Router): void => {
 
@@ -40,8 +41,24 @@ export default (router: Router): void => {
 
     })
 
-    router.get('/planets/:search', async (req: Request, res: Response) => {
-        res.json({ action: "search" })
+    router.get('/planets/*', async (req: Request, res: Response) => {
+        try {
+            const params = req.params[0].split('/')
+
+            const search = SearchValidation(PlanetModelSeachableParams, params)
+
+            const response = await planetControllerFactory().search(search)
+
+            return res.status(response.status).json(response.body)
+        } catch (e) {
+            switch (e.name) {
+                case 'InvalidParamError':
+                    return res.status(400).json({ error: 'ValidationError', ...e })
+                default:
+                    console.error(e)
+                    return res.status(500).json({ error: 'InternalServerErrror' })
+            }
+        }
 
     })
 
