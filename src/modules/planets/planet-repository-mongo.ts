@@ -4,6 +4,7 @@ import { PlanetRepository } from "./planet-repository"
 
 export class PlanetMongoRepository implements PlanetRepository {
 
+
     private collection = 'planets'
 
     async create(planet: Planet): Promise<PlanetModel> {
@@ -12,6 +13,16 @@ export class PlanetMongoRepository implements PlanetRepository {
         return MongoHelper.map(result.ops[0])
     }
 
+    async list(): Promise<PlanetModel[]> {
+        const collection = await MongoHelper.getCollection(this.collection)
+        const result = []
+
+        await collection.find({}).forEach((doc) => {
+            result.push(MongoHelper.map(doc))
+        });
+
+        return result
+    }
 
 
 }
