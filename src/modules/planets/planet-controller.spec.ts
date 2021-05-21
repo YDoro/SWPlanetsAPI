@@ -1,3 +1,4 @@
+import { GetPlanetMovieApparitionService } from '../../services/protocols/get_planet_movie_apparition_service'
 import { PlanetController } from './planet-controller'
 import { Planet, PlanetModel } from './planet-model'
 import { PlanetRepository } from './planet-repository'
@@ -24,16 +25,24 @@ describe('PlanetController', () => {
         }
 
     }
+    class PlanetMovieApparitionServiceStub implements GetPlanetMovieApparitionService {
+        async getPlanetApparitionsByName(name: string): Promise<number> {
+            return await new Promise(resolve => resolve(1))
+        }
+
+    }
 
     interface SUTTypes {
         sut: PlanetController
         repository: PlanetRepository
+        getPlanetMovieApparitionService: GetPlanetMovieApparitionService
     }
 
     const makeSUT = (): SUTTypes => {
         const repository = new PlanetRepositoryStub()
-        const sut = new PlanetController(repository)
-        return { repository, sut }
+        const getPlanetMovieApparitionService = new PlanetMovieApparitionServiceStub()
+        const sut = new PlanetController(repository, getPlanetMovieApparitionService)
+        return { repository, sut, getPlanetMovieApparitionService }
     }
 
     const planet: Planet = {
@@ -42,19 +51,27 @@ describe('PlanetController', () => {
         terrain: 'grasslands'
     }
     describe('create', () => {
-        test('should call repository with the given object and return the an HttpReponse', async () => {
-            const { sut, repository } = makeSUT()
+        test('should call repository and service with the given objects and return the an HttpReponse', async () => {
+            const { sut, repository, getPlanetMovieApparitionService } = makeSUT()
             const createSpy = jest.spyOn(repository, 'create')
+            const getApparitionSpy = jest.spyOn(getPlanetMovieApparitionService, 'getPlanetApparitionsByName')
+
             const promise = sut.create(planet)
-
-            expect(createSpy).toBeCalledWith(planet)
-            await expect(promise).resolves.toEqual({ status: 201, body: { ...planet, id: 'any_id' } })
-
+            await expect(promise).resolves.toEqual({ status: 201, body: { ...planet, id: 'any_id', movieApparitions: 1 } })
+            expect(getApparitionSpy).toBeCalledWith(planet.name)
+            expect(createSpy).toBeCalledWith({ ...planet, movieApparitions: 1 })
         })
 
         test('should throw if repository throws', async () => {
             const { sut, repository } = makeSUT()
             jest.spyOn(repository, 'create').mockRejectedValueOnce(new Error('mocked error'))
+            const promise = sut.create(planet)
+            await expect(promise).rejects.toThrowError('mocked error')
+        })
+
+        test('should throw if service throws', async () => {
+            const { sut, getPlanetMovieApparitionService } = makeSUT()
+            jest.spyOn(getPlanetMovieApparitionService, 'getPlanetApparitionsByName').mockRejectedValueOnce(new Error('mocked error'))
             const promise = sut.create(planet)
             await expect(promise).rejects.toThrowError('mocked error')
         })
