@@ -6,6 +6,7 @@ describe('PlanetController', () => {
 
     class PlanetRepositoryStub implements PlanetRepository {
 
+
         create(planet: Planet): Promise<PlanetModel> {
             return new Promise(resolve => resolve({ ...planet, id: 'any_id' }))
         }
@@ -16,6 +17,10 @@ describe('PlanetController', () => {
 
         search(query: object): Promise<PlanetModel[]> {
             return new Promise(resolve => resolve([{ ...planet, id: 'any_id' }]))
+        }
+
+        deletePlanetById(id: string): Promise<void> {
+            return new Promise(resolve => resolve())
         }
 
     }
@@ -85,6 +90,23 @@ describe('PlanetController', () => {
             const { sut, repository } = makeSUT()
             jest.spyOn(repository, 'search').mockRejectedValueOnce(new Error('mocked error'))
             const promise = sut.search({ name: 'tattoine' })
+            await expect(promise).rejects.toThrowError('mocked error')
+        })
+    })
+
+    describe('delete', () => {
+        test('should call repository and return a 204 response', async () => {
+            const { sut, repository } = makeSUT()
+            const deleteSpy = jest.spyOn(repository, 'deletePlanetById')
+            const promise = sut.delete('any_value')
+            expect(deleteSpy).toBeCalledWith('any_value')
+            await expect(promise).resolves.toEqual({ status: 204 })
+        })
+
+        test('should throw if repository throws', async () => {
+            const { sut, repository } = makeSUT()
+            jest.spyOn(repository, 'deletePlanetById').mockRejectedValueOnce(new Error('mocked error'))
+            const promise = sut.delete('any_id')
             await expect(promise).rejects.toThrowError('mocked error')
         })
     })
