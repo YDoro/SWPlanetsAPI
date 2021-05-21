@@ -67,4 +67,24 @@ describe('Planet Routes', () => {
             await supertest(app).get('/api/planets/name/tatooine').expect(500)
         })
     })
+
+    describe('delete', () => {
+        test('should return a 204 on success', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            await (await MongoHelper.getCollection('planets')).insert(planet)
+            const dbplanet = await (await MongoHelper.getCollection('planets')).findOne({ name: planet.name })
+            const response = await supertest(app).delete('/api/planets/' + dbplanet._id)
+            expect(response.status).toBe(204)
+        })
+        test('should return a 400 response on invalid search', async () => {
+            const response = await supertest(app).delete('/api/planets/tatooine')
+            expect(response.status).toBe(400)
+        })
+        test('should return 500 on unexpected error', async () => {
+            jest.spyOn(MongoClient, 'connect').mockImplementationOnce(() => { throw new Error('mocked') })
+            await MongoHelper.disconnect()
+            await supertest(app).delete('/api/planets/60a81cc7b2182cb0df94b3f0').expect(500)
+        })
+
+    })
 })
