@@ -93,5 +93,23 @@ describe('PlanetMongoRepository', () => {
                 await expect(promise).rejects.toBeInstanceOf(Error)
             })
         })
+        describe('getPlanetByName', () => {
+            test('should return the planet if it exists', async () => {
+                await (await MongoHelper.getCollection('planets')).deleteMany({})
+                await sut.create(planet)
+                const response = await sut.getPlanetByName(planet.name)
+                expect(response.name).toEqual(planet.name)
+            })
+            test('shold return null if it does not exist', async () => {
+                await (await MongoHelper.getCollection('planets')).deleteMany({})
+                const response = await sut.getPlanetByName(planet.name)
+                expect(response).toBeNull()
+            })
+            test('should throw on any error', async () => {
+                const promise = sut.getPlanetByName('deathstar')
+                await MongoHelper.disconnect()
+                await expect(promise).rejects.toBeInstanceOf(Error)
+            })
+        })
     })
 })
