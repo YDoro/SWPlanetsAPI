@@ -3,6 +3,7 @@ import app from '../../config/app';
 import { MongoHelper } from "../../config/database";
 import env from "../../config/env";
 import { MongoClient } from 'mongodb'
+
 describe('Planet Routes', () => {
     beforeAll(async () => {
         await MongoHelper.connect(env.mongoUrl)
@@ -17,19 +18,20 @@ describe('Planet Routes', () => {
     }
 
     describe('Create', () => {
+
         test('should return 201 on success', async () => {
             await supertest(app).post('/api/planets').send(planet).expect(201)
-        })
+        }, 60000)
 
         test('should return 400 on validation error', async () => {
             await supertest(app).post('/api/planets').send({ ...planet, name: null }).expect(400)
-        })
+        }, 60000)
 
         test('should return 500 on unexpected error', async () => {
             jest.spyOn(MongoClient, 'connect').mockImplementationOnce(() => { throw new Error('mocked') })
             await MongoHelper.disconnect()
             await supertest(app).post('/api/planets').send(planet).expect(500)
-        })
+        }, 60000)
     })
     describe('list', () => {
         test('should return a 200 with an array', async () => {
