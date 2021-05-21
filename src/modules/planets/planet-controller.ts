@@ -1,4 +1,5 @@
 import { HttpResponse } from "../../protocols/http"
+import { GetPlanetMovieApparitionService } from "../../services/protocols/get_planet_movie_apparition_service"
 import { Planet } from "./planet-model"
 import { PlanetRepository } from "./planet-repository"
 
@@ -6,11 +7,16 @@ import { PlanetRepository } from "./planet-repository"
 
 export class PlanetController {
     constructor(
-        private readonly repository: PlanetRepository
+        private readonly repository: PlanetRepository,
+        private readonly movieApparitionService: GetPlanetMovieApparitionService
     ) { }
 
     async create(planet: Planet): Promise<HttpResponse> {
-        const dbPlanet = await this.repository.create(planet)
+        const movieApparitions = await this.movieApparitionService.getPlanetApparitionsByName(planet.name)
+
+        const planetWMovie = { ...planet, movieApparitions }
+
+        const dbPlanet = await this.repository.create(planetWMovie)
         return { status: 201, body: dbPlanet }
     }
 
