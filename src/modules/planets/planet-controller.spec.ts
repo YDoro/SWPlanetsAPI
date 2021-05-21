@@ -24,6 +24,10 @@ describe('PlanetController', () => {
             return new Promise(resolve => resolve())
         }
 
+        getPlanetByName(name: string): Promise<PlanetModel> {
+            return new Promise(resolve => resolve(null))
+        }
+
     }
     class PlanetMovieApparitionServiceStub implements GetPlanetMovieApparitionService {
         async getPlanetApparitionsByName(name: string): Promise<number> {
@@ -60,6 +64,18 @@ describe('PlanetController', () => {
             await expect(promise).resolves.toEqual({ status: 201, body: { ...planet, id: 'any_id', movieApparitions: 1 } })
             expect(getApparitionSpy).toBeCalledWith(planet.name)
             expect(createSpy).toBeCalledWith({ ...planet, movieApparitions: 1 })
+        })
+
+        test('should not call repository create or service if planet already exists', async () => {
+            const { sut, repository, getPlanetMovieApparitionService } = makeSUT()
+            jest.spyOn(repository, 'getPlanetByName').mockResolvedValueOnce({ ...planet, id: 'any_id' })
+            const createSpy = jest.spyOn(repository, 'create')
+            const getApparitionSpy = jest.spyOn(getPlanetMovieApparitionService, 'getPlanetApparitionsByName')
+
+            const promise = sut.create(planet)
+            await expect(promise).resolves.toEqual({ status: 200, body: { ...planet, id: 'any_id' } })
+            expect(getApparitionSpy).not.toBeCalled()
+            expect(createSpy).not.toBeCalled()
         })
 
         test('should throw if repository throws', async () => {
