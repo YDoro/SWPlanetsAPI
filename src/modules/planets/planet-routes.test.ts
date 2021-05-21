@@ -10,13 +10,13 @@ describe('Planet Routes', () => {
     afterAll(async () => {
         await MongoHelper.disconnect()
     })
-    describe('Create', () => {
-        const planet = {
-            name: 'Alderaan',
-            terrain: 'gresslands',
-            climate: 'temperate'
-        }
+    const planet = {
+        name: 'Alderaan',
+        terrain: 'gresslands',
+        climate: 'temperate'
+    }
 
+    describe('Create', () => {
         test('should return 201 on success', async () => {
             await supertest(app).post('/api/planets').send(planet).expect(201)
         })
@@ -29,6 +29,18 @@ describe('Planet Routes', () => {
             jest.spyOn(MongoClient, 'connect').mockImplementationOnce(() => { throw new Error('mocked') })
             await MongoHelper.disconnect()
             await supertest(app).post('/api/planets').send(planet).expect(500)
+        })
+    })
+    describe('list', () => {
+        test('should return a 200 with an array', async () => {
+            const response = await supertest(app).get('/api/planets')
+            expect(response.status).toBe(200)
+            expect(response.body).toBeInstanceOf(Array)
+        })
+        test('should return 500 on unexpected error', async () => {
+            jest.spyOn(MongoClient, 'connect').mockImplementationOnce(() => { throw new Error('mocked') })
+            await MongoHelper.disconnect()
+            await supertest(app).get('/api/planets').expect(500)
         })
     })
 })
