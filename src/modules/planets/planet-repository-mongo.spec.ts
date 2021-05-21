@@ -66,5 +66,32 @@ describe('PlanetMongoRepository', () => {
             await MongoHelper.disconnect()
             await expect(promise).rejects.toBeInstanceOf(Error)
         })
+        describe('Delete', () => {
+            test('should delete planet if it exists', async () => {
+                await (await MongoHelper.getCollection('planets')).deleteMany({})
+                await sut.create(planet)
+                const dbplanet = await sut.search(planet)
+                await sut.deletePlanetById('' + dbplanet[0].id)
+                expect(true).toBeTruthy()
+            })
+            test('shold not throw if object does not exists', async () => {
+                await (await MongoHelper.getCollection('planets')).deleteMany({})
+                await sut.create(planet)
+                const dbplanet = await sut.search(planet)
+                await sut.deletePlanetById('' + dbplanet[0].id)
+                const response = await sut.deletePlanetById('' + dbplanet[0].id)
+                expect(response).toBeUndefined()
+
+            })
+            test('should throw on invalid id', async () => {
+                const promise = sut.deletePlanetById('deathstar')
+                await expect(promise).rejects.toBeInstanceOf(Error)
+            })
+            test('should throw on any error', async () => {
+                const promise = sut.deletePlanetById('deathstar')
+                await MongoHelper.disconnect()
+                await expect(promise).rejects.toBeInstanceOf(Error)
+            })
+        })
     })
 })
