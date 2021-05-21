@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { MongoHelper } from './config/database'
 import env from './config/env'
 

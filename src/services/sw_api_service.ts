@@ -42,7 +42,7 @@ export class SWAPIService implements GetPlanetMovieApparitionService {
 
     }
 
-    private async getPlanets(page = 1): Promise<Array<SWAPIPlanet>> {
+    private async getPlanets(page: number): Promise<Array<SWAPIPlanet>> {
         try {
             const response = await this.http.get('/api/planets/?page=' + page, { validateStatus: (status) => status === 200 })
             return response.data.results
