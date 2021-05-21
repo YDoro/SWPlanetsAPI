@@ -32,7 +32,6 @@ export class SWAPIService implements GetPlanetMovieApparitionService {
             returnedLength = returnedplanets.length
             returnedplanets.forEach((planet) => {
                 if (planet.name.toLowerCase() === name.toLowerCase()) {
-                    console.log(planet.films)
                     movieApparitions = planet.films.length
                     returnedLength = 0
                 }
