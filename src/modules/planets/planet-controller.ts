@@ -23,4 +23,9 @@ export class PlanetController {
         const result = await this.repository.search(query)
         return { status: 200, body: result }
     }
+
+    async delete(id: string): Promise<HttpResponse> {
+        await this.repository.deletePlanetById(id)
+        return { status: 204 }
+    }
 }
