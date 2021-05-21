@@ -22,6 +22,7 @@ export default (router: Router): void => {
                 case 'RequiredFieldError':
                     return res.status(400).json({ error: 'ValidationError', ...e })
                 default:
+                    console.error(e)
                     return res.status(500).json({ error: 'InternalServerErrror' })
             }
         }
@@ -29,7 +30,13 @@ export default (router: Router): void => {
     })
 
     router.get('/planets', async (req: Request, res: Response) => {
-        res.json({ action: "list" })
+        try {
+            const response = await planetControllerFactory().list()
+            return res.status(response.status).json(response.body)
+        } catch (e) {
+            console.error(e)
+            return res.status(500).json({ error: 'InternalServerErrror' })
+        }
 
     })
 
