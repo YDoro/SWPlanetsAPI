@@ -43,4 +43,28 @@ describe('Planet Routes', () => {
             await supertest(app).get('/api/planets').expect(500)
         })
     })
+
+    describe('search', () => {
+        test('should return a 200 response with an array', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            await (await MongoHelper.getCollection('planets')).insert(planet)
+            const response = await supertest(app).get('/api/planets/name/' + planet.name + '/climate/' + planet.climate + '/terrain/' + planet.terrain)
+            expect(response.status).toBe(200)
+            expect(response.body).toBeInstanceOf(Array)
+        })
+
+        test('should return a 400 response on invalid search', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            await (await MongoHelper.getCollection('planets')).insert(planet)
+            const response = await supertest(app).get('/api/planets/names/' + planet.name + '/climate/' + planet.climate + '/terrain/' + planet.terrain)
+            expect(response.status).toBe(400)
+        })
+
+
+        test('should return 500 on unexpected error', async () => {
+            jest.spyOn(MongoClient, 'connect').mockImplementationOnce(() => { throw new Error('mocked') })
+            await MongoHelper.disconnect()
+            await supertest(app).get('/api/planets/name/tatooine').expect(500)
+        })
+    })
 })
