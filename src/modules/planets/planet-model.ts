@@ -4,5 +4,5 @@ export interface Planet {
     terrain: string
 }
 export interface PlanetModel extends Planet {
-    _id: string
+    id: string
 }
