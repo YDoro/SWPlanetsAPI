@@ -14,6 +14,10 @@ describe('PlanetController', () => {
             return new Promise(resolve => resolve([{ ...planet, id: 'any_id' }]))
         }
 
+        search(query: object): Promise<PlanetModel[]> {
+            return new Promise(resolve => resolve([{ ...planet, id: 'any_id' }]))
+        }
+
     }
 
     interface SUTTypes {
@@ -64,6 +68,23 @@ describe('PlanetController', () => {
             const { sut, repository } = makeSUT()
             jest.spyOn(repository, 'list').mockRejectedValueOnce(new Error('mocked error'))
             const promise = sut.list()
+            await expect(promise).rejects.toThrowError('mocked error')
+        })
+    })
+
+    describe('search', () => {
+        test('should call repository and return a 200 response', async () => {
+            const { sut, repository } = makeSUT()
+            const searchSpy = jest.spyOn(repository, 'search')
+            const promise = sut.search({ name: 'alderaan' })
+            expect(searchSpy).toBeCalledWith({ name: 'alderaan' })
+            await expect(promise).resolves.toEqual({ status: 200, body: [{ ...planet, id: 'any_id' }] })
+        })
+
+        test('should throw if repository throws', async () => {
+            const { sut, repository } = makeSUT()
+            jest.spyOn(repository, 'search').mockRejectedValueOnce(new Error('mocked error'))
+            const promise = sut.search({ name: 'tattoine' })
             await expect(promise).rejects.toThrowError('mocked error')
         })
     })
