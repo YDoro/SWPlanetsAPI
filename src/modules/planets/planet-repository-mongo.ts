@@ -1,8 +1,10 @@
+import { ObjectId } from "bson"
 import { MongoHelper } from "../../config/database"
 import { Planet, PlanetModel } from "./planet-model"
 import { PlanetRepository } from "./planet-repository"
 
 export class PlanetMongoRepository implements PlanetRepository {
+
     private collection = 'planets'
 
     async create(planet: Planet): Promise<PlanetModel> {
@@ -24,6 +26,10 @@ export class PlanetMongoRepository implements PlanetRepository {
         })
 
         return result
+    }
+
+    async deletePlanetById(id: string): Promise<void> {
+        await (await MongoHelper.getCollection(this.collection)).findOneAndDelete({ _id: ObjectId.createFromHexString(id) })
     }
 
 
