@@ -18,4 +18,9 @@ export class PlanetController {
         const planets = await this.repository.list()
         return { status: 200, body: planets }
     }
+
+    async search(query: object): Promise<HttpResponse> {
+        const result = await this.repository.search(query)
+        return { status: 200, body: result }
+    }
 }
