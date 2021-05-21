@@ -12,6 +12,10 @@ export class PlanetController {
     ) { }
 
     async create(planet: Planet): Promise<HttpResponse> {
+        const existentPlanet = await this.repository.getPlanetByName(planet.name)
+        if (existentPlanet) {
+            return { status: 200, body: existentPlanet }
+        }
         const movieApparitions = await this.movieApparitionService.getPlanetApparitionsByName(planet.name)
 
         const planetWMovie = { ...planet, movieApparitions }
