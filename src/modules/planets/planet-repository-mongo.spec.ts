@@ -37,13 +37,34 @@ describe('PlanetMongoRepository', () => {
             const promise = sut.list()
             await expect(promise).resolves.toHaveLength(1)
         })
+        test('should return empty on not found', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            const promise = sut.list()
+            await expect(promise).resolves.toHaveLength(0)
+        })
         test('should throw on any error', async () => {
             const promise = sut.list()
             await MongoHelper.disconnect()
             await expect(promise).rejects.toBeInstanceOf(Error)
         })
-
-
     })
-
+    describe('Search', () => {
+        test('should return the list matches planets', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            await sut.create(planet)
+            await sut.create({ name: 'tatooine', climate: planet.climate, terrain: planet.terrain })
+            const promise = sut.search({ climate: planet.climate })
+            await expect(promise).resolves.toHaveLength(2)
+        })
+        test('should empty on not found', async () => {
+            await (await MongoHelper.getCollection('planets')).deleteMany({})
+            const promise = sut.search({ climate: planet.climate })
+            await expect(promise).resolves.toHaveLength(0)
+        })
+        test('should throw on any error', async () => {
+            const promise = sut.search({ name: 'deathstar' })
+            await MongoHelper.disconnect()
+            await expect(promise).rejects.toBeInstanceOf(Error)
+        })
+    })
 })
