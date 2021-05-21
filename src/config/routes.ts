@@ -1,5 +1,5 @@
 import { Express, Router } from 'express'
-import planets from '../modules/planets/planet.routes'
+import planets from '../modules/planets/planet-routes'
 
 export default (app: Express): void => {
     const router = Router()
