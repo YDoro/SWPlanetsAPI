@@ -22,7 +22,7 @@ export class PlanetMongoRepository implements PlanetRepository {
         const collection = await MongoHelper.getCollection(this.collection)
         const result = []
 
-        await collection.find({ ...query }).forEach((doc) => {
+        await collection.find({ ...MongoHelper.regexSearch(query) }).forEach((doc) => {
             result.push(MongoHelper.map(doc))
         })
 

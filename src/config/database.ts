@@ -25,5 +25,12 @@ export const MongoHelper = {
     map: (collection: any): any => {
         const { _id, ...collectionWOId } = collection
         return Object.assign({}, collectionWOId, { id: _id })
+    },
+    regexSearch: (search: object): object => {
+        let regexSearch = {}
+        Object.keys(search).forEach((key) => {
+            regexSearch[key] = typeof search[key] === 'string' ? new RegExp([search[key]].join(""), "i") : search[key]
+        })
+        return regexSearch
     }
 }
